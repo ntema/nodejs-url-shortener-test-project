@@ -10,16 +10,16 @@ A scalable RESTful API backend for a URL shortening service built with Node.js, 
 - [API Endpoints](#api-endpoints)
 
 ## Features
-- [cite_start]**Shorten URL:** Generates a unique 6-character alphanumeric code for any long URL[cite: 12].
-- [cite_start]**Fast Redirection:** Uses Redis caching to provide low-latency redirection to the original URL[cite: 17].
-- [cite_start]**Analytics:** Tracks the total number of clicks/accesses for every short code[cite: 25].
+- **Shorten URL:** Generates a unique 6-character alphanumeric code for any long URL.
+- **Fast Redirection:** Uses Redis caching to provide low-latency redirection to the original URL.
+- **Analytics:** Tracks the total number of clicks/accesses for every short code.
 - **Scalable Architecture:** Designed to handle high traffic loads with caching and database optimization.
 
 ## Tech Stack
 - **Runtime:** Node.js
 - **Framework:** Express.js
-- [cite_start]**Database:** MongoDB (Primary Storage) [cite: 31]
-- [cite_start]**Cache:** Redis (High-speed retrieval) [cite: 3]
+- **Database:** MongoDB (Primary Storage)
+- **Cache:** Redis (High-speed retrieval)
 - **Tools:** Mongoose, Nanoid
 
 ---
@@ -31,38 +31,37 @@ We selected **MongoDB** as the primary database for storing URL mappings.
 * **Justification:** The data model for a URL shortener is document-oriented (storing a mapping of `shortCode`, `longUrl`, and `meta-data`). It does not require complex joins typical of relational databases like MySQL.
 * **Advantages:**
     * **Read Performance:** MongoDB offers high read throughput, which is essential for a redirection service that is read-heavy.
-    * [cite_start]**Scaling:** MongoDB's built-in support for **Sharding** allows the system to scale horizontally easily as the dataset grows[cite: 32].
+    * **Scaling:** MongoDB's built-in support for **Sharding** allows the system to scale horizontally easily as the dataset grows.
     * **Schema Flexibility:** Allows for easy addition of future analytics fields (e.g., user agent, geo-location) without rigid schema migrations.
 
 ### 2. The Role of Redis
 Redis is implemented as a **Look-aside Cache** to optimize the Redirection Endpoint.
-* **Role:** When a redirection request comes in, the system first checks Redis. If the data exists, it redirects immediately. [cite_start]If not, it fetches from MongoDB, updates Redis, and then redirects[cite: 17, 18, 20].
-* **Problem Solved:** It solves the **latency and database load** problem. In a URL shortener, following the Pareto Principle (80/20 rule), a small percentage of links generate the majority of traffic. [cite_start]Redis keeps these "hot" links in memory, preventing the primary database from being overwhelmed by repetitive read requests[cite: 35].
-
+* **Role:** When a redirection request comes in, the system first checks Redis. If the data exists, it redirects immediately. If not, it fetches from MongoDB, updates Redis, and then redirects.
+* **Problem Solved:** It solves the **latency and database load** problem. In a URL shortener, following the Pareto Principle (80/20 rule), a small percentage of links generate the majority of traffic. Redis keeps these "hot" links in memory, preventing the primary database from being overwhelmed by repetitive read requests.
 
 
 ### 3. Scaling for High Availability (100k RPS)
 To handle 100,000 requests per second, the following architectural changes are proposed:
 * **Node.js/Express Layer:**
     * **Clustering:** Use the Node.js Cluster module or a process manager like PM2 to utilize all CPU cores on the server instance.
-    * [cite_start]**Load Balancing:** Deploy multiple instances of the application behind a Load Balancer (e.g., Nginx, AWS ELB) to distribute incoming traffic evenly across servers[cite: 37, 38].
+    * **Load Balancing:** Deploy multiple instances of the application behind a Load Balancer (e.g., Nginx, AWS ELB) to distribute incoming traffic evenly across servers.
 * **Database Layer:**
     * **Read Replicas:** Implement a Master-Slave architecture where the Master handles writes (creating short URLs) and multiple Read Replicas handle the redirection lookups.
-    * **Sharding:** Partition the database based on the hash of the `shortCode`. [cite_start]This distributes the data across multiple database nodes to prevent any single node from becoming a bottleneck[cite: 39].
+    * **Sharding:** Partition the database based on the hash of the `shortCode`. This distributes the data across multiple database nodes to prevent any single node from becoming a bottleneck.
 
 ### 4. Collision Handling Strategy
-* [cite_start]**Strategy:** We generate unique 6-character alphanumeric codes (e.g., `AbCd1E`) using a library like `nanoid` or a base62 encoding algorithm[cite: 12].
+* **Strategy:** We generate unique 6-character alphanumeric codes (e.g., `AbCd1E`) using a library like `nanoid` or a base62 encoding algorithm.
 * **Handling Collisions:**
     1. Generate a candidate code.
     2. Check the database (or a fast Bloom Filter) to see if the code already exists.
     3. If a collision is detected, regenerate the code and repeat the check.
-* **Trade-offs:** This "check-then-write" strategy ensures data integrity but introduces a slight latency penalty during the creation process. [cite_start]However, given the vast number of combinations ($62^6 \approx 56.8$ billion), collisions are statistically rare in the early stages[cite: 43, 44].
+* **Trade-offs:** This "check-then-write" strategy ensures data integrity but introduces a slight latency penalty during the creation process. However, given the vast number of combinations ($62^6 \approx 56.8$ billion), collisions are statistically rare in the early stages.
 
 ---
 
 ## Getting Started
 
-[cite_start]Follow these instructions to set up and run the project locally[cite: 47].
+Follow these instructions to set up and run the project locally.
 
 ### Prerequisites
 Ensure you have the following installed on your machine:
@@ -102,6 +101,8 @@ Ensure you have the following installed on your machine:
     ```
     The server should start on port 3000.
 
+![Project Setup and Running](Capture3.PNG)
+
 ---
 
 ## API Endpoints
@@ -110,14 +111,20 @@ Ensure you have the following installed on your machine:
 * **Method:** `POST`
 * **Path:** `/api/v1/shorten`
 * **Body:** `{ "longUrl": "https://www.google.com" }`
-* [cite_start]**Description:** Generates a short code and stores the mapping[cite: 9, 10].
+* **Description:** Generates a short code and stores the mapping.
+
+![Shorten URL Response](Capture1.PNG)
 
 ### 2. Redirect URL
 * **Method:** `GET`
 * **Path:** `/:shortCode`
-* **Description:** Redirects the user to the original URL. [cite_start]Updates click count asynchronously[cite: 16].
+* **Description:** Redirects the user to the original URL. Updates click count asynchronously.
+
+![Redirection Endpoint](Capture2.PNG)
 
 ### 3. Analytics
 * **Method:** `GET`
 * **Path:** `/api/v1/analytics/:shortCode`
-* [cite_start]**Description:** Returns the total click count for the given short code[cite: 23].
+* **Description:** Returns the total click count for the given short code.
+
+![Analytics Response](Capture4.PNG)
