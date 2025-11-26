@@ -101,7 +101,7 @@ Ensure you have the following installed on your machine:
     ```
     The server should start on port 3000.
 
-![Project Setup and Running](Capture3.PNG)
+![Project Setup and Running](assets/Capture3.PNG)
 
 ---
 
@@ -113,18 +113,18 @@ Ensure you have the following installed on your machine:
 * **Body:** `{ "longUrl": "https://www.google.com" }`
 * **Description:** Generates a short code and stores the mapping.
 
-![Shorten URL Response](Capture1.PNG)
+![Shorten URL Response](assets/Capture1.PNG)
 
 ### 2. Redirect URL
 * **Method:** `GET`
 * **Path:** `/:shortCode`
 * **Description:** Redirects the user to the original URL. Updates click count asynchronously.
 
-![Redirection Endpoint](Capture2.PNG)
+![Redirection Endpoint](assets/Capture2.PNG)
 
 ### 3. Analytics
 * **Method:** `GET`
 * **Path:** `/api/v1/analytics/:shortCode`
 * **Description:** Returns the total click count for the given short code.
 
-![Analytics Response](Capture4.PNG)
+![Analytics Response](assets/Capture4.PNG)
