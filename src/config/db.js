@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
-const constant = require("../config/constant");
 const connectDB = async () => {
   try {
-    await mongoose.connect(constant.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000,
     });

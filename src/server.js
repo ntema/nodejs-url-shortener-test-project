@@ -1,16 +1,30 @@
 const express = require("express");
 const connectDB = require("./config/db");
 require("dotenv").config();
+const cors = require("cors");
 
 const app = express();
+
+const corsOptions = {
+  origin: "*",
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
+
+//middlewares
+app.use(express.urlencoded({ limit: "1000000mb", extended: true }));
+app.use(express.json({ limit: "1000000mb", extended: true }));
 
 // Connect to Database
 connectDB();
 
-// Middleware
-app.use(express.json({ extended: false }));
-
 // Routes
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "We're up and running",
+  });
+});
 app.use("/", require("./routes/urlRoutes"));
 
 app.use((req, res, next) => {
